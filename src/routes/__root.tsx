@@ -77,7 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#000000" },
+      { name: "theme-color", content: "#0a1a3a" },
       { title: "PayRald — Move money at the speed of Africa" },
       { name: "description", content: "PayRald is the consumer payments app powered by ALIA. Send, receive and pay using just a username, email or phone — no account numbers, ever." },
       { name: "author", content: "PayRald" },
