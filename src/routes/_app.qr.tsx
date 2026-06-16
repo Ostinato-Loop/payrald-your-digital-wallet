@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Camera, QrCode, Share2 } from "lucide-react";
 import { Screen } from "@/components/payrald/Screen";
-import { me } from "@/lib/payrald/mock";
 
 export const Route = createFileRoute("/_app/qr")({
   head: () => ({ meta: [{ title: "Scan · PayRald" }] }),
@@ -9,10 +8,16 @@ export const Route = createFileRoute("/_app/qr")({
 });
 
 function QrPage() {
+  const { me } = Route.useRouteContext();
+  const handle = me?.username ? `@${me.username}` : me?.email ?? "@you";
+
   return (
-    <Screen title="Scan to pay" subtitle="Point your camera at any ALIA QR" back={false}>
+    <Screen
+      title="Scan to pay"
+      subtitle="Point your camera at any ALIA QR"
+      back={false}
+    >
       <div className="relative aspect-square w-full overflow-hidden rounded-3xl border border-border bg-black">
-        {/* Faux camera viewport */}
         <div
           className="absolute inset-0"
           style={{
@@ -41,13 +46,16 @@ function QrPage() {
         </span>
         <div className="flex-1">
           <div className="text-sm font-medium">My QR code</div>
-          <div className="text-xs text-muted-foreground">Get paid as {me.handle}</div>
+          <div className="text-xs text-muted-foreground">
+            Get paid as {handle}
+          </div>
         </div>
         <Share2 className="h-4 w-4 text-muted-foreground" />
       </Link>
 
       <p className="px-2 text-center text-xs text-muted-foreground">
-        Works for personal, merchant, business, school and government QRs. Powered by ALIA.
+        Works for personal, merchant, business, school and government QRs.
+        Powered by ALIA.
       </p>
     </Screen>
   );

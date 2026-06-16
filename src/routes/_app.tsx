@@ -1,8 +1,20 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { Home, Wallet, Activity, QrCode, Store } from "lucide-react";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  redirect,
+  useRouterState,
+} from "@tanstack/react-router";
+import { Activity, Home, QrCode, Store, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getMe } from "@/lib/payrald/api.server";
 
 export const Route = createFileRoute("/_app")({
+  beforeLoad: async () => {
+    const me = await getMe();
+    if (!me) throw redirect({ to: "/welcome" });
+    return { me };
+  },
   component: AppShell,
 });
 
@@ -24,14 +36,15 @@ function AppShell() {
         <Outlet />
       </main>
 
-      {/* Bottom Tab Bar */}
       <nav
         className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[460px] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2"
         aria-label="Primary"
       >
         <div className="surface-card flex items-end justify-between gap-1 px-2 py-2 backdrop-blur">
           {tabs.map((t) => {
-            const active = pathname === t.to || (t.to !== "/home" && pathname.startsWith(t.to));
+            const active =
+              pathname === t.to ||
+              (t.to !== "/home" && pathname.startsWith(t.to));
             const Icon = t.icon;
             if (t.center) {
               return (
@@ -51,12 +64,16 @@ function AppShell() {
                 to={t.to}
                 className={cn(
                   "tap flex flex-1 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-[10px] font-medium",
-                  active ? "text-foreground" : "text-muted-foreground"
+                  active ? "text-foreground" : "text-muted-foreground",
                 )}
               >
-                <Icon className={cn("h-[22px] w-[22px]", active && "text-primary")} />
+                <Icon
+                  className={cn("h-[22px] w-[22px]", active && "text-primary")}
+                />
                 <span>{t.label}</span>
-                {active && <span className="h-0.5 w-5 rounded-full bg-primary" />}
+                {active && (
+                  <span className="h-0.5 w-5 rounded-full bg-primary" />
+                )}
               </Link>
             );
           })}

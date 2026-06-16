@@ -17,28 +17,58 @@ import { useState } from "react";
 import payraldMark from "@/assets/payrald-mark.png";
 import { Avatar } from "@/components/payrald/Avatar";
 import { SectionTitle } from "@/components/payrald/Screen";
-import { fmtNGN, fmtRel, me, merchants, recents, transactions } from "@/lib/payrald/mock";
+import { fmtNGN } from "@/lib/payrald/mock";
+import { getWallet, getTransactions, getMerchants } from "@/lib/payrald/api.server";
+import type { TxRow, WalletData, MerchantRow } from "@/lib/payrald/api.server";
 
 export const Route = createFileRoute("/_app/home")({
   head: () => ({ meta: [{ title: "PayRald — Home" }] }),
+  loader: async () => {
+    const [walletResult, txResult, merchantsResult] = await Promise.all([
+      getWallet(),
+      getTransactions({ data: { limit: 8 } }),
+      getMerchants(),
+    ]);
+    return {
+      wallet: walletResult.data,
+      walletError: walletResult.error,
+      transactions: txResult.data,
+      merchants: merchantsResult.data,
+    };
+  },
   component: HomePage,
 });
 
 function HomePage() {
+  const { me } = Route.useRouteContext();
+  const { wallet, walletError, transactions, merchants } =
+    Route.useLoaderData();
   const [hidden, setHidden] = useState(false);
-  const balance = 482350;
+
+  const balance = wallet?.balance ?? 0;
+  const ledger = wallet?.ledger_balance ?? 0;
+  const pending = Math.max(0, ledger - balance);
+
+  const displayName =
+    me?.name ??
+    me?.username ??
+    me?.email?.split("@")[0] ??
+    "You";
+  const handle = me?.username ? `@${me.username}` : me?.email ?? "";
+
   return (
     <div className="flex flex-col gap-6 px-5 pb-6 pt-6">
-      {/* Top bar */}
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img src={payraldMark} alt="PayRald" className="h-9 w-9" />
           <div>
             <div className="flex items-center gap-1.5 text-sm font-semibold">
-              {me.handle}
-              {me.verified && <CheckCircle2 className="h-3.5 w-3.5 text-success" />}
+              {handle || displayName}
+              <CheckCircle2 className="h-3.5 w-3.5 text-success" />
             </div>
-            <div className="text-[11px] text-muted-foreground">{me.email}</div>
+            <div className="text-[11px] text-muted-foreground">
+              {me?.email ?? ""}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -60,7 +90,6 @@ function HomePage() {
         </div>
       </header>
 
-      {/* Balance Card */}
       <section
         className="relative overflow-hidden rounded-3xl border border-border p-5 text-white"
         style={{
@@ -75,22 +104,41 @@ function HomePage() {
         />
         <div className="flex items-start justify-between">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">Available balance</div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-white/50">
+              Available balance
+            </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-[34px] font-semibold tracking-tight">
-                {hidden ? "₦ ••••••" : fmtNGN(balance)}
+                {walletError === "unauthenticated"
+                  ? "₦ —"
+                  : walletError
+                  ? "₦ —"
+                  : hidden
+                  ? "₦ ••••••"
+                  : fmtNGN(balance)}
               </span>
             </div>
-            <div className="mt-1 text-xs text-white/50">Settled instantly · NGN wallet</div>
+            <div className="mt-1 text-xs text-white/50">
+              {wallet?.currency ?? "NGN"} wallet · Settled instantly
+            </div>
           </div>
           <button
             className="tap flex h-9 w-9 items-center justify-center rounded-full bg-white/10"
             onClick={() => setHidden((v) => !v)}
             aria-label="Toggle balance visibility"
           >
-            {hidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+            {hidden ? (
+              <Eye className="h-4 w-4" />
+            ) : (
+              <EyeOff className="h-4 w-4" />
+            )}
           </button>
         </div>
+        {pending > 0 && !hidden && (
+          <div className="mt-2 text-xs text-white/40">
+            +{fmtNGN(pending)} pending
+          </div>
+        )}
         <div className="mt-5 flex gap-2">
           <Link
             to="/wallet"
@@ -110,7 +158,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Quick actions */}
       <section className="grid grid-cols-4 gap-2">
         {[
           { label: "Send", icon: ArrowUpRight, to: "/send" },
@@ -131,102 +178,97 @@ function HomePage() {
         ))}
       </section>
 
-      {/* Recents */}
-      <section>
-        <SectionTitle action={<Link to="/send" className="text-xs text-primary">New</Link>}>
-          Send again
-        </SectionTitle>
-        <div className="no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5">
-          <Link
-            to="/send"
-            className="tap flex w-16 shrink-0 flex-col items-center gap-2 text-center"
-          >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-border bg-surface text-muted-foreground">
-              <Plus className="h-5 w-5" />
-            </span>
-            <span className="text-[10px] text-muted-foreground">New</span>
-          </Link>
-          {recents.map((r) => (
-            <Link
-              key={r.handle}
-              to="/send"
-              className="tap flex w-16 shrink-0 flex-col items-center gap-2 text-center"
-            >
-              <Avatar name={r.name} color={r.color} size={48} />
-              <span className="truncate text-[10px] text-muted-foreground">{r.handle}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Featured merchants */}
-      <section>
-        <SectionTitle action={<Link to="/marketplace" className="text-xs text-primary">See all</Link>}>
-          Pay merchants
-        </SectionTitle>
-        <div className="no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5">
-          {merchants.slice(0, 8).map((m) => (
-            <Link
-              key={m.id}
-              to="/merchant/$id"
-              params={{ id: m.id }}
-              className="tap flex w-20 shrink-0 flex-col items-center gap-2 text-center"
-            >
-              <span
-                className="flex h-12 w-12 items-center justify-center rounded-2xl text-sm font-semibold text-white"
-                style={{ background: m.color }}
-              >
-                {m.name[0]}
-              </span>
-              <span className="truncate text-[10px] text-muted-foreground">{m.name}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Recent activity */}
-      <section>
-        <SectionTitle action={<Link to="/activity" className="text-xs text-primary">All</Link>}>
-          Recent activity
-        </SectionTitle>
-        <div className="surface-card divide-y divide-border">
-          {transactions.slice(0, 4).map((t) => {
-            const isIn = t.amount > 0;
-            return (
-              <Link
-                to="/activity"
-                key={t.id}
-                className="tap flex items-center gap-3 px-3 py-3 first:rounded-t-2xl last:rounded-b-2xl"
-              >
-                <span
-                  className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                    isIn ? "bg-success/15 text-success" : "bg-surface-2 text-foreground/80"
-                  }`}
-                >
-                  {isIn ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">{t.party}</div>
-                  <div className="truncate text-xs text-muted-foreground">
-                    {t.partyHandle} · {fmtRel(t.at)}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div
-                    className={`text-sm font-semibold ${isIn ? "text-success" : "text-foreground"}`}
-                  >
-                    {isIn ? "+" : ""}
-                    {fmtNGN(Math.abs(t.amount))}
-                  </div>
-                  <div className="text-[10px] capitalize text-muted-foreground">{t.status}</div>
-                </div>
+      {merchants.length > 0 && (
+        <section>
+          <SectionTitle
+            action={
+              <Link to="/marketplace" className="text-xs text-primary">
+                See all
               </Link>
-            );
-          })}
-        </div>
-      </section>
+            }
+          >
+            Pay merchants
+          </SectionTitle>
+          <div className="no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5">
+            {merchants.slice(0, 8).map((m: MerchantRow) => (
+              <Link
+                key={m.id}
+                to="/merchant/$id"
+                params={{ id: m.alias }}
+                className="tap flex w-20 shrink-0 flex-col items-center gap-2 text-center"
+              >
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/20 text-sm font-semibold text-primary">
+                  {m.name[0]}
+                </span>
+                <span className="truncate text-[10px] text-muted-foreground">
+                  {m.name}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
-      {/* Identity QR teaser */}
+      {transactions.length > 0 && (
+        <section>
+          <SectionTitle
+            action={
+              <Link to="/activity" className="text-xs text-primary">
+                All
+              </Link>
+            }
+          >
+            Recent activity
+          </SectionTitle>
+          <div className="surface-card divide-y divide-border">
+            {transactions.slice(0, 4).map((t: TxRow) => {
+              const isIn = t.direction === "credit";
+              return (
+                <Link
+                  to="/activity"
+                  key={t.id}
+                  className="tap flex items-center gap-3 px-3 py-3 first:rounded-t-2xl last:rounded-b-2xl"
+                >
+                  <span
+                    className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                      isIn
+                        ? "bg-success/15 text-success"
+                        : "bg-surface-2 text-foreground/80"
+                    }`}
+                  >
+                    {isIn ? (
+                      <ArrowDownLeft className="h-4 w-4" />
+                    ) : (
+                      <ArrowUpRight className="h-4 w-4" />
+                    )}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">
+                      {t.recipient_name ?? t.recipient_alias ?? t.type}
+                    </div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      {t.recipient_alias ?? t.narration ?? t.type} ·{" "}
+                      {new Date(t.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div
+                      className={`text-sm font-semibold ${isIn ? "text-success" : "text-foreground"}`}
+                    >
+                      {isIn ? "+" : ""}
+                      {fmtNGN(t.amount)}
+                    </div>
+                    <div className="text-[10px] capitalize text-muted-foreground">
+                      {t.status}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <Link
         to="/receive"
         className="tap surface-card flex items-center gap-3 px-4 py-4"
@@ -236,7 +278,9 @@ function HomePage() {
         </span>
         <div className="flex-1">
           <div className="text-sm font-medium">Your ALIA identity</div>
-          <div className="text-xs text-muted-foreground">Share {me.handle} to get paid instantly</div>
+          <div className="text-xs text-muted-foreground">
+            Share {handle || "@you"} to get paid instantly
+          </div>
         </div>
         <span className="text-xs font-medium text-primary">Share</span>
       </Link>

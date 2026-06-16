@@ -1,47 +1,92 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { CheckCircle2, Globe2, ShieldCheck, Star } from "lucide-react";
 import { Screen, SectionTitle } from "@/components/payrald/Screen";
-import { fmtNGN, marketplace, merchants } from "@/lib/payrald/mock";
+import { fmtNGN } from "@/lib/payrald/mock";
+import {
+  getMerchantByAlias,
+  getVoucherProducts,
+} from "@/lib/payrald/api.server";
+import type { VoucherProduct } from "@/lib/payrald/api.server";
 
 export const Route = createFileRoute("/_app/merchant/$id")({
   head: () => ({ meta: [{ title: "Merchant · PayRald" }] }),
+  loader: async ({ params }) => {
+    const [merchant, productsResult] = await Promise.all([
+      getMerchantByAlias({ data: { alias: params.id } }),
+      getVoucherProducts(),
+    ]);
+    const products = merchant
+      ? productsResult.data.filter(
+          (p: VoucherProduct) =>
+            p.vendor.toLowerCase() === merchant.name.toLowerCase(),
+        )
+      : [];
+    return { merchant, products };
+  },
   component: MerchantPage,
 });
 
 function MerchantPage() {
   const { id } = useParams({ from: "/_app/merchant/$id" });
-  const m = merchants.find((x) => x.id === id) ?? merchants[0];
-  const products = marketplace.filter((p) => p.vendor.toLowerCase() === m.name.toLowerCase()).slice(0, 4);
+  const { merchant, products } = Route.useLoaderData();
+
+  if (!merchant) {
+    return (
+      <Screen title="" back>
+        <div className="surface-card px-4 py-8 text-center text-sm text-muted-foreground">
+          Merchant not found
+        </div>
+      </Screen>
+    );
+  }
+
+  const trustStr =
+    merchant.trust_score != null
+      ? String(merchant.trust_score)
+      : "Verified";
 
   return (
     <Screen title="" back>
       <section
         className="surface-card flex flex-col items-center gap-3 p-6 text-center"
         style={{
-          background: `linear-gradient(135deg, color-mix(in oklab, ${m.color} 35%, transparent), oklch(0.08 0 0))`,
+          background: `linear-gradient(135deg, color-mix(in oklab, #e11d2a 20%, transparent), oklch(0.08 0 0))`,
         }}
       >
-        <span
-          className="flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold text-white"
-          style={{ background: m.color }}
-        >
-          {m.name[0]}
+        <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20 text-2xl font-bold text-primary">
+          {merchant.name[0]}
         </span>
         <div>
           <div className="flex items-center justify-center gap-1.5 text-lg font-semibold">
-            {m.name} <CheckCircle2 className="h-4 w-4 text-success" />
+            {merchant.name}
+            {merchant.verified && (
+              <CheckCircle2 className="h-4 w-4 text-success" />
+            )}
           </div>
-          <div className="text-xs text-muted-foreground">{m.handle} · {m.category}</div>
+          <div className="text-xs text-muted-foreground">
+            {merchant.alias}
+            {merchant.category ? ` · ${merchant.category}` : ""}
+          </div>
         </div>
         <div className="mt-1 flex items-center gap-2">
-          <span className="chip"><ShieldCheck className="h-3 w-3 text-success" /> Verified merchant</span>
-          <span className="chip"><Star className="h-3 w-3 text-mustard" /> Trust {m.trust}</span>
+          {merchant.verified && (
+            <span className="chip">
+              <ShieldCheck className="h-3 w-3 text-success" /> Verified merchant
+            </span>
+          )}
+          <span className="chip">
+            <Star className="h-3 w-3 text-mustard" /> Trust {trustStr}
+          </span>
         </div>
       </section>
 
       <div className="grid grid-cols-3 gap-3 text-center">
-        <Stat label="Trust" value={`${m.trust}`} />
-        <Stat label="Coverage" value="54 countries" icon={<Globe2 className="h-3 w-3" />} />
+        <Stat label="Trust" value={trustStr} />
+        <Stat
+          label="Coverage"
+          value="54 countries"
+          icon={<Globe2 className="h-3 w-3" />}
+        />
         <Stat label="Settlement" value="Instant" />
       </div>
 
@@ -49,13 +94,23 @@ function MerchantPage() {
         <>
           <SectionTitle>Buy now</SectionTitle>
           <div className="grid grid-cols-2 gap-3">
-            {products.map((p) => (
-              <div key={p.id} className="surface-card flex flex-col gap-2 p-4">
-                <span className="chip">{p.kind}</span>
+            {products.slice(0, 4).map((p: VoucherProduct) => (
+              <div
+                key={p.slug}
+                className="surface-card flex flex-col gap-2 p-4"
+              >
+                <span className="chip">{p.kind ?? p.category ?? "Voucher"}</span>
                 <div className="text-sm font-medium leading-tight">{p.name}</div>
                 <div className="mt-auto flex items-end justify-between">
-                  <div className="text-base font-semibold">{fmtNGN(p.price)}</div>
-                  <button className="text-[11px] font-semibold text-primary">Buy →</button>
+                  <div className="text-base font-semibold">
+                    {fmtNGN(p.price)}
+                  </div>
+                  <Link
+                    to="/marketplace"
+                    className="text-[11px] font-semibold text-primary"
+                  >
+                    Buy →
+                  </Link>
                 </div>
               </div>
             ))}
@@ -70,7 +125,9 @@ function MerchantPage() {
       >
         <div>
           <div className="text-sm font-medium">Custom amount</div>
-          <div className="text-xs text-muted-foreground">Send any amount to {m.handle}</div>
+          <div className="text-xs text-muted-foreground">
+            Send any amount to {merchant.alias}
+          </div>
         </div>
         <span className="text-sm font-semibold text-primary">Pay →</span>
       </Link>
@@ -78,11 +135,20 @@ function MerchantPage() {
   );
 }
 
-function Stat({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
+function Stat({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+}) {
   return (
     <div className="surface-card px-2 py-3">
       <div className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-        {icon}{label}
+        {icon}
+        {label}
       </div>
       <div className="mt-1 text-sm font-semibold">{value}</div>
     </div>

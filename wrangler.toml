@@ -1,0 +1,20 @@
+name = "payrald"
+compatibility_date = "2025-06-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".output/public"
+
+[vars]
+PAYRALD_API_URL  = "https://pay.rald.cloud"
+SUPABASE_URL     = "https://onxdcikfttdmnhofsuwo.supabase.co"
+NODE_ENV         = "production"
+
+# Secrets — set via `wrangler pages secret put` or GitHub Actions
+# SUPABASE_ANON_KEY
+
+[[routes]]
+pattern  = "payrald.rald.cloud/*"
+zone_name = "rald.cloud"
+
+[observability]
+enabled             = true
+head_sampling_rate  = 1
