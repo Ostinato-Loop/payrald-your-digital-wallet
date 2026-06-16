@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Search, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Screen, SectionTitle } from "@/components/payrald/Screen";
+import { VendorLogo } from "@/components/payrald/VendorLogo";
 import { getMerchants } from "@/lib/payrald/api.server";
 import type { MerchantRow } from "@/lib/payrald/api.server";
 
@@ -75,6 +76,7 @@ function PayPage() {
         </div>
       )}
 
+      {/* Marketplace CTA */}
       <Link
         to="/marketplace"
         className="tap relative overflow-hidden rounded-2xl border border-border p-4"
@@ -87,11 +89,17 @@ function PayPage() {
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-mustard text-mustard-foreground">
             <Sparkles className="h-5 w-5" />
           </span>
-          <div>
+          <div className="flex-1">
             <div className="text-sm font-semibold">Digital marketplace</div>
             <div className="text-xs text-muted-foreground">
               Gift cards, subscriptions, cloud credits — delivered instantly
             </div>
+          </div>
+          {/* Mini logo parade */}
+          <div className="flex gap-1">
+            {["Netflix", "Spotify", "Steam"].map((v) => (
+              <VendorLogo key={v} name={v} size={22} rounded="rounded-md" />
+            ))}
           </div>
         </div>
       </Link>
@@ -109,11 +117,11 @@ function PayPage() {
               key={m.id}
               to="/merchant/$id"
               params={{ id: m.alias }}
-              className="tap surface-card flex flex-col items-center gap-2 px-2 py-4 text-center"
+              className="tap surface-card flex flex-col items-center gap-2.5 px-2 py-4 text-center"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/20 text-base font-bold text-primary">
-                {m.name[0]}
-              </span>
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/40 bg-white/5 p-1">
+                <VendorLogo name={m.name} size={44} rounded="rounded-xl" />
+              </div>
               <div className="w-full">
                 <div className="truncate text-xs font-medium">{m.name}</div>
                 <div className="truncate text-[10px] text-muted-foreground">

@@ -15,11 +15,15 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import payraldMark from "@/assets/payrald-mark.png";
-import { Avatar } from "@/components/payrald/Avatar";
 import { SectionTitle } from "@/components/payrald/Screen";
+import { VendorLogo } from "@/components/payrald/VendorLogo";
 import { fmtNGN } from "@/lib/payrald/mock";
-import { getWallet, getTransactions, getMerchants } from "@/lib/payrald/api.server";
-import type { TxRow, WalletData, MerchantRow } from "@/lib/payrald/api.server";
+import {
+  getWallet,
+  getTransactions,
+  getMerchants,
+} from "@/lib/payrald/api.server";
+import type { TxRow, MerchantRow } from "@/lib/payrald/api.server";
 
 export const Route = createFileRoute("/_app/home")({
   head: () => ({ meta: [{ title: "PayRald — Home" }] }),
@@ -50,14 +54,12 @@ function HomePage() {
   const pending = Math.max(0, ledger - balance);
 
   const displayName =
-    me?.name ??
-    me?.username ??
-    me?.email?.split("@")[0] ??
-    "You";
+    me?.name ?? me?.username ?? me?.email?.split("@")[0] ?? "You";
   const handle = me?.username ? `@${me.username}` : me?.email ?? "";
 
   return (
     <div className="flex flex-col gap-6 px-5 pb-6 pt-6">
+      {/* Top bar */}
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img src={payraldMark} alt="PayRald" className="h-9 w-9" />
@@ -90,6 +92,7 @@ function HomePage() {
         </div>
       </header>
 
+      {/* Balance card */}
       <section
         className="relative overflow-hidden rounded-3xl border border-border p-5 text-white"
         style={{
@@ -109,13 +112,11 @@ function HomePage() {
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-[34px] font-semibold tracking-tight">
-                {walletError === "unauthenticated"
-                  ? "₦ —"
-                  : walletError
+                {walletError
                   ? "₦ —"
                   : hidden
-                  ? "₦ ••••••"
-                  : fmtNGN(balance)}
+                    ? "₦ ••••••"
+                    : fmtNGN(balance)}
               </span>
             </div>
             <div className="mt-1 text-xs text-white/50">
@@ -158,6 +159,7 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Quick actions */}
       <section className="grid grid-cols-4 gap-2">
         {[
           { label: "Send", icon: ArrowUpRight, to: "/send" },
@@ -178,11 +180,12 @@ function HomePage() {
         ))}
       </section>
 
+      {/* Pay merchants — horizontal scroll with real logos */}
       {merchants.length > 0 && (
         <section>
           <SectionTitle
             action={
-              <Link to="/marketplace" className="text-xs text-primary">
+              <Link to="/pay" className="text-xs text-primary">
                 See all
               </Link>
             }
@@ -190,25 +193,37 @@ function HomePage() {
             Pay merchants
           </SectionTitle>
           <div className="no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5">
-            {merchants.slice(0, 8).map((m: MerchantRow) => (
+            {merchants.slice(0, 10).map((m: MerchantRow) => (
               <Link
                 key={m.id}
                 to="/merchant/$id"
                 params={{ id: m.alias }}
-                className="tap flex w-20 shrink-0 flex-col items-center gap-2 text-center"
+                className="tap flex w-[72px] shrink-0 flex-col items-center gap-2 text-center"
               >
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/20 text-sm font-semibold text-primary">
-                  {m.name[0]}
-                </span>
-                <span className="truncate text-[10px] text-muted-foreground">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/40 bg-white/5 p-1 shadow-sm">
+                  <VendorLogo name={m.name} size={44} rounded="rounded-xl" />
+                </div>
+                <span className="w-full truncate text-[10px] text-muted-foreground">
                   {m.name}
                 </span>
               </Link>
             ))}
+            <Link
+              to="/pay"
+              className="tap flex w-[72px] shrink-0 flex-col items-center gap-2 text-center"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-dashed border-border bg-surface text-muted-foreground">
+                <Plus className="h-5 w-5" />
+              </div>
+              <span className="w-full truncate text-[10px] text-muted-foreground">
+                More
+              </span>
+            </Link>
           </div>
         </section>
       )}
 
+      {/* Recent activity */}
       {transactions.length > 0 && (
         <section>
           <SectionTitle
@@ -269,6 +284,7 @@ function HomePage() {
         </section>
       )}
 
+      {/* ALIA identity teaser */}
       <Link
         to="/receive"
         className="tap surface-card flex items-center gap-3 px-4 py-4"
