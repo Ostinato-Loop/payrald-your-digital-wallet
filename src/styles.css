@@ -59,29 +59,30 @@
 :root {
   --radius: 1rem;
 
-  --background: oklch(0.05 0 0);
-  --foreground: oklch(0.98 0 0);
+  /* Black canvas with subtle navy lift */
+  --background: oklch(0.045 0.008 265);
+  --foreground: oklch(0.985 0 0);
 
-  --surface: oklch(0.115 0 0);
-  --surface-2: oklch(0.16 0 0);
+  --surface: oklch(0.12 0.015 265);
+  --surface-2: oklch(0.17 0.02 265);
 
-  --card: oklch(0.115 0 0);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.13 0 0);
-  --popover-foreground: oklch(0.98 0 0);
+  --card: oklch(0.12 0.015 265);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.14 0.018 265);
+  --popover-foreground: oklch(0.985 0 0);
 
-  /* RALD red */
+  /* RALD red — CTA / brand pulse */
   --primary: oklch(0.62 0.22 25);
   --primary-foreground: oklch(0.99 0 0);
 
-  --secondary: oklch(0.2 0 0);
-  --secondary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.22 0.03 265);
+  --secondary-foreground: oklch(0.985 0 0);
 
-  --muted: oklch(0.2 0 0);
-  --muted-foreground: oklch(0.66 0.01 260);
+  --muted: oklch(0.2 0.02 265);
+  --muted-foreground: oklch(0.68 0.02 260);
 
-  --accent: oklch(0.22 0 0);
-  --accent-foreground: oklch(0.98 0 0);
+  --accent: oklch(0.22 0.03 265);
+  --accent-foreground: oklch(0.985 0 0);
 
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
@@ -92,14 +93,16 @@
   --warning: oklch(0.78 0.15 75);
   --warning-foreground: oklch(0.15 0.05 70);
 
-  --navy: oklch(0.28 0.09 260);
-  --navy-foreground: oklch(0.98 0 0);
+  /* PayRald navy — primary brand surface */
+  --navy: oklch(0.22 0.09 265);
+  --navy-foreground: oklch(0.985 0 0);
 
-  --mustard: oklch(0.74 0.16 70);
+  /* PayRald mustard — warmth / highlights */
+  --mustard: oklch(0.74 0.16 72);
   --mustard-foreground: oklch(0.15 0.05 70);
 
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 10%);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 11%);
   --ring: oklch(0.62 0.22 25 / 60%);
 }
 
@@ -119,7 +122,8 @@
 
   body {
     background:
-      radial-gradient(1200px 600px at 50% -10%, color-mix(in oklab, var(--primary) 18%, transparent), transparent 60%),
+      radial-gradient(900px 500px at 50% -10%, color-mix(in oklab, var(--navy) 70%, transparent), transparent 60%),
+      radial-gradient(600px 400px at 100% 110%, color-mix(in oklab, var(--primary) 25%, transparent), transparent 70%),
       var(--color-background);
     min-height: 100dvh;
   }
