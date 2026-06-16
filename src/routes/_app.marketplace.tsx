@@ -13,8 +13,38 @@ export const Route = createFileRoute("/_app/marketplace")({
     const result = await getVoucherProducts();
     return { products: result.data };
   },
+  pendingComponent: MarketSkeleton,
+  pendingMs: 150,
+  pendingMinMs: 400,
   component: MarketPage,
 });
+
+function Bone({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded-2xl bg-surface-2 ${className}`} />;
+}
+
+function MarketSkeleton() {
+  return (
+    <div className="flex flex-col gap-5 px-5 pb-6 pt-5">
+      <div className="flex flex-col gap-1">
+        <Bone className="h-7 w-40" />
+        <Bone className="h-4 w-56 rounded-xl" />
+      </div>
+      <Bone className="h-20 rounded-3xl" />
+      <div className="flex gap-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Bone key={i} className="h-8 w-20 rounded-full" />
+        ))}
+      </div>
+      <Bone className="h-4 w-40 rounded-xl" />
+      <div className="grid grid-cols-2 gap-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Bone key={i} className="h-36" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function MarketPage() {
   const { products } = Route.useLoaderData();
@@ -23,8 +53,12 @@ function MarketPage() {
   const [err, setErr] = useState<string | null>(null);
   const [filter, setFilter] = useState("All");
 
-  const vendors = ["All", ...Array.from(new Set(products.map((p) => p.vendor)))];
-  const list = filter === "All" ? products : products.filter((p) => p.vendor === filter);
+  const vendors = [
+    "All",
+    ...Array.from(new Set(products.map((p) => p.vendor))),
+  ];
+  const list =
+    filter === "All" ? products : products.filter((p) => p.vendor === filter);
 
   const buy = async (p: VoucherProduct) => {
     setBuying(p.slug);
@@ -43,17 +77,23 @@ function MarketPage() {
 
   if (bought) {
     return (
-      <Screen back={false} title="" className="items-center pt-16 text-center">
-        <div className="mx-auto flex flex-col items-center gap-5">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success/15 text-success">
-            <CheckCircle2 className="h-10 w-10" />
+      <Screen back={false} title="" className="items-center pt-20 text-center">
+        <div className="mx-auto flex flex-col items-center gap-5 px-6">
+          <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-success/15 text-success">
+            <CheckCircle2 className="h-12 w-12" strokeWidth={1.5} />
           </div>
-          <VendorLogo name={bought.vendor} size={52} rounded="rounded-2xl" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/40 bg-white/5 p-1">
+            <VendorLogo name={bought.vendor} size={44} rounded="rounded-xl" />
+          </div>
           <div>
-            <div className="text-xl font-semibold">Purchased!</div>
-            <div className="mt-1 text-sm text-muted-foreground">
-              <span className="font-medium">{bought.name}</span> from{" "}
-              {bought.vendor} delivered to your account
+            <div className="text-2xl font-semibold tracking-tight">
+              Purchased!
+            </div>
+            <div className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              <span className="font-medium text-foreground">{bought.name}</span>{" "}
+              from {bought.vendor}
+              <br />
+              delivered to your account
             </div>
           </div>
           <div className="chip mt-1">
@@ -61,7 +101,7 @@ function MarketPage() {
             merchant instantly
           </div>
           <button
-            className="tap mt-2 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-glow-red"
+            className="tap mt-4 w-full rounded-full bg-primary py-4 text-sm font-semibold text-primary-foreground shadow-glow-red"
             onClick={() => setBought(null)}
           >
             Done
@@ -82,7 +122,7 @@ function MarketPage() {
         }}
       >
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-mustard text-mustard-foreground">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mustard text-mustard-foreground">
             <Zap className="h-5 w-5" />
           </span>
           <div>
@@ -93,7 +133,7 @@ function MarketPage() {
           </div>
         </div>
         {/* Floating logos */}
-        <div className="pointer-events-none absolute right-4 top-1/2 flex -translate-y-1/2 gap-1.5 opacity-60">
+        <div className="pointer-events-none absolute right-4 top-1/2 flex -translate-y-1/2 gap-1.5 opacity-70">
           {["Netflix", "Spotify", "OpenAI"].map((v) => (
             <VendorLogo key={v} name={v} size={28} rounded="rounded-lg" />
           ))}
@@ -101,7 +141,7 @@ function MarketPage() {
       </div>
 
       {err && (
-        <p className="rounded-xl bg-destructive/10 px-4 py-2.5 text-xs text-destructive">
+        <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {err}
         </p>
       )}
@@ -113,7 +153,7 @@ function MarketPage() {
             <button
               key={v}
               onClick={() => setFilter(v)}
-              className={`tap flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${
+              className={`tap flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                 filter === v
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-surface text-muted-foreground"
@@ -128,10 +168,10 @@ function MarketPage() {
         </div>
       )}
 
-      <SectionTitle>Subscriptions & gift cards</SectionTitle>
+      <SectionTitle>Subscriptions &amp; gift cards</SectionTitle>
 
       {list.length === 0 ? (
-        <div className="surface-card px-4 py-8 text-center text-sm text-muted-foreground">
+        <div className="surface-card px-4 py-10 text-center text-sm text-muted-foreground">
           No products available right now
         </div>
       ) : (
@@ -157,16 +197,20 @@ function MarketPage() {
               </div>
 
               {/* Product name */}
-              <div className="text-sm font-medium leading-tight">{p.name}</div>
+              <div className="line-clamp-2 text-sm font-medium leading-snug">
+                {p.name}
+              </div>
 
               {/* Price + CTA */}
               <div className="mt-auto flex items-center justify-between">
-                <div className="text-base font-semibold">{fmtNGN(p.price)}</div>
+                <div className="text-base font-semibold tabular-nums">
+                  {fmtNGN(p.price)}
+                </div>
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition-colors ${
                     buying === p.slug
                       ? "bg-surface-2 text-muted-foreground"
-                      : "bg-primary/15 text-primary group-active:bg-primary group-active:text-primary-foreground"
+                      : "bg-primary/15 text-primary"
                   }`}
                 >
                   {buying === p.slug ? "Buying…" : "Buy"}

@@ -40,8 +40,85 @@ export const Route = createFileRoute("/_app/home")({
       merchants: merchantsResult.data,
     };
   },
+  pendingComponent: HomeSkeleton,
+  pendingMs: 150,
+  pendingMinMs: 400,
   component: HomePage,
 });
+
+function Bone({
+  className = "",
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <div
+      className={`animate-pulse rounded-2xl bg-surface-2 ${className}`}
+      style={style}
+    />
+  );
+}
+
+function HomeSkeleton() {
+  return (
+    <div className="flex flex-col gap-6 px-5 pb-6 pt-6">
+      <header className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Bone className="h-9 w-9 rounded-full" />
+          <div className="flex flex-col gap-2">
+            <Bone className="h-4 w-28" />
+            <Bone className="h-3 w-36 rounded-xl" />
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Bone className="h-10 w-10 rounded-full" />
+          <Bone className="h-10 w-10 rounded-full" />
+        </div>
+      </header>
+
+      <Bone className="h-44 rounded-3xl" />
+
+      <div className="grid grid-cols-4 gap-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Bone key={i} className="h-[88px] rounded-2xl" />
+        ))}
+      </div>
+
+      <div>
+        <Bone className="mb-4 h-4 w-32 rounded-xl" />
+        <div className="flex gap-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex w-[72px] shrink-0 flex-col items-center gap-2">
+              <Bone className="h-14 w-14" />
+              <Bone className="h-3 w-12 rounded-xl" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Bone className="mb-4 h-4 w-32 rounded-xl" />
+        <div className="surface-card divide-y divide-border">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 px-3 py-3">
+              <Bone className="h-10 w-10 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Bone className="h-3.5 w-32 rounded-xl" />
+                <Bone className="h-3 w-24 rounded-xl" />
+              </div>
+              <div className="space-y-2 text-right">
+                <Bone className="ml-auto h-3.5 w-16 rounded-xl" />
+                <Bone className="ml-auto h-3 w-10 rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function HomePage() {
   const { me } = Route.useRouteContext();
@@ -59,7 +136,6 @@ function HomePage() {
 
   return (
     <div className="flex flex-col gap-6 px-5 pb-6 pt-6">
-      {/* Top bar */}
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img src={payraldMark} alt="PayRald" className="h-9 w-9" />
@@ -137,7 +213,7 @@ function HomePage() {
         </div>
         {pending > 0 && !hidden && (
           <div className="mt-2 text-xs text-white/40">
-            +{fmtNGN(pending)} pending
+            +{fmtNGN(pending)} pending clearance
           </div>
         )}
         <div className="mt-5 flex gap-2">
@@ -245,7 +321,7 @@ function HomePage() {
                   className="tap flex items-center gap-3 px-3 py-3 first:rounded-t-2xl last:rounded-b-2xl"
                 >
                   <span
-                    className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
                       isIn
                         ? "bg-success/15 text-success"
                         : "bg-surface-2 text-foreground/80"
@@ -266,11 +342,11 @@ function HomePage() {
                       {new Date(t.created_at).toLocaleDateString()}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 text-right">
                     <div
-                      className={`text-sm font-semibold ${isIn ? "text-success" : "text-foreground"}`}
+                      className={`text-sm font-semibold tabular-nums ${isIn ? "text-success" : "text-foreground"}`}
                     >
-                      {isIn ? "+" : ""}
+                      {isIn ? "+" : "−"}
                       {fmtNGN(t.amount)}
                     </div>
                     <div className="text-[10px] capitalize text-muted-foreground">
@@ -295,10 +371,10 @@ function HomePage() {
         <div className="flex-1">
           <div className="text-sm font-medium">Your ALIA identity</div>
           <div className="text-xs text-muted-foreground">
-            Share {handle || "@you"} to get paid instantly
+            Share {handle || "@you"} · get paid instantly
           </div>
         </div>
-        <span className="text-xs font-medium text-primary">Share</span>
+        <span className="text-xs font-semibold text-primary">Share →</span>
       </Link>
     </div>
   );

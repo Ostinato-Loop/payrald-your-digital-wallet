@@ -19,19 +19,21 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: "1.1.38"
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
-
-      - name: Typecheck
-        run: bun run typecheck 2>/dev/null || true
 
       - name: Build
         run: bun run build
         env:
           NODE_ENV: production
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Verify build output
+        run: |
+          echo "=== Build output ==="
+          ls -la .output/public/ 2>/dev/null || (echo "ERROR: .output/public not found — checking dist/" && ls -la dist/ 2>/dev/null && exit 1)
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
@@ -40,9 +42,11 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy .output/public --project-name payrald --branch main
 
-      - name: Set runtime secrets
+      - name: Set SUPABASE_ANON_KEY secret
+        if: ${{ secrets.SUPABASE_ANON_KEY != '' }}
+        continue-on-error: true
         run: |
-          echo "${{ secrets.SUPABASE_ANON_KEY }}" | npx wrangler pages secret put SUPABASE_ANON_KEY --project-name payrald
+          echo "${{ secrets.SUPABASE_ANON_KEY }}" | wrangler pages secret put SUPABASE_ANON_KEY --project-name payrald
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getCookie, setCookie, deleteCookie } from "vinxi/http";
+import { getCookie, setCookie, deleteCookie } from "@tanstack/start-server-core";
 import { z } from "zod";
 
 const SUPABASE_URL = "https://onxdcikfttdmnhofsuwo.supabase.co";

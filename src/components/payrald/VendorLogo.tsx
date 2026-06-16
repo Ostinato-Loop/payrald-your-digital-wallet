@@ -54,7 +54,6 @@ const DOMAINS: Record<string, string> = {
   Crunchyroll: "crunchyroll.com",
   Audible: "audible.com",
   Kindle: "amazon.com",
-  "VPN Unlimited": "keepsolid.com",
   ExpressVPN: "expressvpn.com",
   NordVPN: "nordvpn.com",
   Surfshark: "surfshark.com",
@@ -84,13 +83,10 @@ const DOMAINS: Record<string, string> = {
   PiggyVest: "piggyvest.com",
   Flutterwave: "flutterwave.com",
   Paystack: "paystack.com",
-  Stripe: "stripe.com",
-  Visa: "visa.com",
-  Mastercard: "mastercard.com",
 };
 
-function logoUrl(domain: string, size = 64) {
-  return `https://logo.clearbit.com/${domain}?size=${size}`;
+function clearbitUrl(domain: string, size: number) {
+  return `https://logo.clearbit.com/${domain}?size=${size * 2}`;
 }
 
 function faviconUrl(domain: string) {
@@ -98,8 +94,7 @@ function faviconUrl(domain: string) {
 }
 
 function guessDomain(name: string): string {
-  const lower = name.toLowerCase().replace(/[^a-z0-9]/g, "");
-  return `${lower}.com`;
+  return name.toLowerCase().replace(/[^a-z0-9]/g, "") + ".com";
 }
 
 type Props = {
@@ -109,6 +104,8 @@ type Props = {
   rounded?: string;
 };
 
+type Stage = "clearbit" | "favicon" | "letter";
+
 export function VendorLogo({
   name,
   size = 48,
@@ -116,12 +113,11 @@ export function VendorLogo({
   rounded = "rounded-2xl",
 }: Props) {
   const domain = DOMAINS[name] ?? guessDomain(name);
-  const [src, setSrc] = useState(logoUrl(domain, size * 2));
-  const [stage, setStage] = useState<"clearbit" | "favicon" | "letter">(
-    "clearbit",
-  );
+  const [src, setSrc] = useState(() => clearbitUrl(domain, size));
+  const [stage, setStage] = useState<Stage>("clearbit");
+  const [loaded, setLoaded] = useState(false);
 
-  const onError = () => {
+  const handleError = () => {
     if (stage === "clearbit") {
       setSrc(faviconUrl(domain));
       setStage("favicon");
@@ -130,11 +126,13 @@ export function VendorLogo({
     }
   };
 
+  const handleLoad = () => setLoaded(true);
+
   if (stage === "letter") {
     return (
       <span
         className={`flex shrink-0 items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10 font-bold text-primary ${rounded} ${className}`}
-        style={{ width: size, height: size, fontSize: size * 0.4 }}
+        style={{ width: size, height: size, fontSize: size * 0.38 }}
       >
         {name[0]?.toUpperCase()}
       </span>
@@ -142,12 +140,23 @@ export function VendorLogo({
   }
 
   return (
-    <img
-      src={src}
-      alt={name}
-      onError={onError}
-      className={`shrink-0 object-contain bg-white ${rounded} ${className}`}
+    <div
+      className={`relative shrink-0 overflow-hidden ${rounded} ${className}`}
       style={{ width: size, height: size }}
-    />
+    >
+      {/* Shimmer while loading */}
+      {!loaded && (
+        <div className="absolute inset-0 animate-pulse bg-surface-2" />
+      )}
+      <img
+        src={src}
+        alt={name}
+        onError={handleError}
+        onLoad={handleLoad}
+        className={`h-full w-full object-contain bg-white transition-opacity duration-200 ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
+      />
+    </div>
   );
 }
