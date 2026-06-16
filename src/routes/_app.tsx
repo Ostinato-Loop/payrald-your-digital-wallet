@@ -6,13 +6,14 @@ export const Route = createFileRoute("/_app")({
   component: AppShell,
 });
 
-const tabs = [
+type Tab = { to: string; label: string; icon: typeof Home; center?: boolean };
+const tabs: Tab[] = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/pay", label: "Pay", icon: Store },
   { to: "/qr", label: "Scan", icon: QrCode, center: true },
   { to: "/activity", label: "Activity", icon: Activity },
   { to: "/wallet", label: "Wallet", icon: Wallet },
-] as const;
+];
 
 function AppShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });

@@ -9,38 +9,201 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppWithdrawRouteImport } from './routes/_app.withdraw'
+import { Route as AppWalletRouteImport } from './routes/_app.wallet'
+import { Route as AppSendRouteImport } from './routes/_app.send'
+import { Route as AppSecurityRouteImport } from './routes/_app.security'
+import { Route as AppReceiveRouteImport } from './routes/_app.receive'
+import { Route as AppQrRouteImport } from './routes/_app.qr'
+import { Route as AppPayRouteImport } from './routes/_app.pay'
+import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
+import { Route as AppMarketplaceRouteImport } from './routes/_app.marketplace'
+import { Route as AppHomeRouteImport } from './routes/_app.home'
+import { Route as AppActivityRouteImport } from './routes/_app.activity'
+import { Route as AppMerchantIdRouteImport } from './routes/_app.merchant.$id'
 
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppWithdrawRoute = AppWithdrawRouteImport.update({
+  id: '/withdraw',
+  path: '/withdraw',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppWalletRoute = AppWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSendRoute = AppSendRouteImport.update({
+  id: '/send',
+  path: '/send',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSecurityRoute = AppSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReceiveRoute = AppReceiveRouteImport.update({
+  id: '/receive',
+  path: '/receive',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppQrRoute = AppQrRouteImport.update({
+  id: '/qr',
+  path: '/qr',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPayRoute = AppPayRouteImport.update({
+  id: '/pay',
+  path: '/pay',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMarketplaceRoute = AppMarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHomeRoute = AppHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppActivityRoute = AppActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMerchantIdRoute = AppMerchantIdRouteImport.update({
+  id: '/merchant/$id',
+  path: '/merchant/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/activity': typeof AppActivityRoute
+  '/home': typeof AppHomeRoute
+  '/marketplace': typeof AppMarketplaceRoute
+  '/notifications': typeof AppNotificationsRoute
+  '/pay': typeof AppPayRoute
+  '/qr': typeof AppQrRoute
+  '/receive': typeof AppReceiveRoute
+  '/security': typeof AppSecurityRoute
+  '/send': typeof AppSendRoute
+  '/wallet': typeof AppWalletRoute
+  '/withdraw': typeof AppWithdrawRoute
+  '/merchant/$id': typeof AppMerchantIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/activity': typeof AppActivityRoute
+  '/home': typeof AppHomeRoute
+  '/marketplace': typeof AppMarketplaceRoute
+  '/notifications': typeof AppNotificationsRoute
+  '/pay': typeof AppPayRoute
+  '/qr': typeof AppQrRoute
+  '/receive': typeof AppReceiveRoute
+  '/security': typeof AppSecurityRoute
+  '/send': typeof AppSendRoute
+  '/wallet': typeof AppWalletRoute
+  '/withdraw': typeof AppWithdrawRoute
+  '/merchant/$id': typeof AppMerchantIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/activity': typeof AppActivityRoute
+  '/_app/home': typeof AppHomeRoute
+  '/_app/marketplace': typeof AppMarketplaceRoute
+  '/_app/notifications': typeof AppNotificationsRoute
+  '/_app/pay': typeof AppPayRoute
+  '/_app/qr': typeof AppQrRoute
+  '/_app/receive': typeof AppReceiveRoute
+  '/_app/security': typeof AppSecurityRoute
+  '/_app/send': typeof AppSendRoute
+  '/_app/wallet': typeof AppWalletRoute
+  '/_app/withdraw': typeof AppWithdrawRoute
+  '/_app/merchant/$id': typeof AppMerchantIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/activity'
+    | '/home'
+    | '/marketplace'
+    | '/notifications'
+    | '/pay'
+    | '/qr'
+    | '/receive'
+    | '/security'
+    | '/send'
+    | '/wallet'
+    | '/withdraw'
+    | '/merchant/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/activity'
+    | '/home'
+    | '/marketplace'
+    | '/notifications'
+    | '/pay'
+    | '/qr'
+    | '/receive'
+    | '/security'
+    | '/send'
+    | '/wallet'
+    | '/withdraw'
+    | '/merchant/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/activity'
+    | '/_app/home'
+    | '/_app/marketplace'
+    | '/_app/notifications'
+    | '/_app/pay'
+    | '/_app/qr'
+    | '/_app/receive'
+    | '/_app/security'
+    | '/_app/send'
+    | '/_app/wallet'
+    | '/_app/withdraw'
+    | '/_app/merchant/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +211,128 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/withdraw': {
+      id: '/_app/withdraw'
+      path: '/withdraw'
+      fullPath: '/withdraw'
+      preLoaderRoute: typeof AppWithdrawRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/wallet': {
+      id: '/_app/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof AppWalletRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/send': {
+      id: '/_app/send'
+      path: '/send'
+      fullPath: '/send'
+      preLoaderRoute: typeof AppSendRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/security': {
+      id: '/_app/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof AppSecurityRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/receive': {
+      id: '/_app/receive'
+      path: '/receive'
+      fullPath: '/receive'
+      preLoaderRoute: typeof AppReceiveRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/qr': {
+      id: '/_app/qr'
+      path: '/qr'
+      fullPath: '/qr'
+      preLoaderRoute: typeof AppQrRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/pay': {
+      id: '/_app/pay'
+      path: '/pay'
+      fullPath: '/pay'
+      preLoaderRoute: typeof AppPayRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/notifications': {
+      id: '/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/marketplace': {
+      id: '/_app/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof AppMarketplaceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/home': {
+      id: '/_app/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AppHomeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/activity': {
+      id: '/_app/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof AppActivityRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/merchant/$id': {
+      id: '/_app/merchant/$id'
+      path: '/merchant/$id'
+      fullPath: '/merchant/$id'
+      preLoaderRoute: typeof AppMerchantIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppActivityRoute: typeof AppActivityRoute
+  AppHomeRoute: typeof AppHomeRoute
+  AppMarketplaceRoute: typeof AppMarketplaceRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
+  AppPayRoute: typeof AppPayRoute
+  AppQrRoute: typeof AppQrRoute
+  AppReceiveRoute: typeof AppReceiveRoute
+  AppSecurityRoute: typeof AppSecurityRoute
+  AppSendRoute: typeof AppSendRoute
+  AppWalletRoute: typeof AppWalletRoute
+  AppWithdrawRoute: typeof AppWithdrawRoute
+  AppMerchantIdRoute: typeof AppMerchantIdRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppActivityRoute: AppActivityRoute,
+  AppHomeRoute: AppHomeRoute,
+  AppMarketplaceRoute: AppMarketplaceRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
+  AppPayRoute: AppPayRoute,
+  AppQrRoute: AppQrRoute,
+  AppReceiveRoute: AppReceiveRoute,
+  AppSecurityRoute: AppSecurityRoute,
+  AppSendRoute: AppSendRoute,
+  AppWalletRoute: AppWalletRoute,
+  AppWithdrawRoute: AppWithdrawRoute,
+  AppMerchantIdRoute: AppMerchantIdRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
