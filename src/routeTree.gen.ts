@@ -9,8 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthWelcomeRouteImport } from './routes/_auth.welcome'
+import { Route as AuthVerifyRouteImport } from './routes/_auth.verify'
+import { Route as AuthSignupRouteImport } from './routes/_auth.signup'
+import { Route as AuthSigninRouteImport } from './routes/_auth.signin'
 import { Route as AppWithdrawRouteImport } from './routes/_app.withdraw'
 import { Route as AppWalletRouteImport } from './routes/_app.wallet'
 import { Route as AppSendRouteImport } from './routes/_app.send'
@@ -24,6 +29,10 @@ import { Route as AppHomeRouteImport } from './routes/_app.home'
 import { Route as AppActivityRouteImport } from './routes/_app.activity'
 import { Route as AppMerchantIdRouteImport } from './routes/_app.merchant.$id'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -32,6 +41,26 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthWelcomeRoute = AuthWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthVerifyRoute = AuthVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSigninRoute = AuthSigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AppWithdrawRoute = AppWithdrawRouteImport.update({
   id: '/withdraw',
@@ -107,6 +136,10 @@ export interface FileRoutesByFullPath {
   '/send': typeof AppSendRoute
   '/wallet': typeof AppWalletRoute
   '/withdraw': typeof AppWithdrawRoute
+  '/signin': typeof AuthSigninRoute
+  '/signup': typeof AuthSignupRoute
+  '/verify': typeof AuthVerifyRoute
+  '/welcome': typeof AuthWelcomeRoute
   '/merchant/$id': typeof AppMerchantIdRoute
 }
 export interface FileRoutesByTo {
@@ -122,12 +155,17 @@ export interface FileRoutesByTo {
   '/send': typeof AppSendRoute
   '/wallet': typeof AppWalletRoute
   '/withdraw': typeof AppWithdrawRoute
+  '/signin': typeof AuthSigninRoute
+  '/signup': typeof AuthSignupRoute
+  '/verify': typeof AuthVerifyRoute
+  '/welcome': typeof AuthWelcomeRoute
   '/merchant/$id': typeof AppMerchantIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_auth': typeof AuthRouteWithChildren
   '/_app/activity': typeof AppActivityRoute
   '/_app/home': typeof AppHomeRoute
   '/_app/marketplace': typeof AppMarketplaceRoute
@@ -139,6 +177,10 @@ export interface FileRoutesById {
   '/_app/send': typeof AppSendRoute
   '/_app/wallet': typeof AppWalletRoute
   '/_app/withdraw': typeof AppWithdrawRoute
+  '/_auth/signin': typeof AuthSigninRoute
+  '/_auth/signup': typeof AuthSignupRoute
+  '/_auth/verify': typeof AuthVerifyRoute
+  '/_auth/welcome': typeof AuthWelcomeRoute
   '/_app/merchant/$id': typeof AppMerchantIdRoute
 }
 export interface FileRouteTypes {
@@ -156,6 +198,10 @@ export interface FileRouteTypes {
     | '/send'
     | '/wallet'
     | '/withdraw'
+    | '/signin'
+    | '/signup'
+    | '/verify'
+    | '/welcome'
     | '/merchant/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -171,11 +217,16 @@ export interface FileRouteTypes {
     | '/send'
     | '/wallet'
     | '/withdraw'
+    | '/signin'
+    | '/signup'
+    | '/verify'
+    | '/welcome'
     | '/merchant/$id'
   id:
     | '__root__'
     | '/'
     | '/_app'
+    | '/_auth'
     | '/_app/activity'
     | '/_app/home'
     | '/_app/marketplace'
@@ -187,16 +238,28 @@ export interface FileRouteTypes {
     | '/_app/send'
     | '/_app/wallet'
     | '/_app/withdraw'
+    | '/_auth/signin'
+    | '/_auth/signup'
+    | '/_auth/verify'
+    | '/_auth/welcome'
     | '/_app/merchant/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  AuthRoute: typeof AuthRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -210,6 +273,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_auth/welcome': {
+      id: '/_auth/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof AuthWelcomeRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/verify': {
+      id: '/_auth/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof AuthVerifyRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/signup': {
+      id: '/_auth/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/signin': {
+      id: '/_auth/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof AuthSigninRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_app/withdraw': {
       id: '/_app/withdraw'
@@ -330,9 +421,26 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface AuthRouteChildren {
+  AuthSigninRoute: typeof AuthSigninRoute
+  AuthSignupRoute: typeof AuthSignupRoute
+  AuthVerifyRoute: typeof AuthVerifyRoute
+  AuthWelcomeRoute: typeof AuthWelcomeRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthSigninRoute: AuthSigninRoute,
+  AuthSignupRoute: AuthSignupRoute,
+  AuthVerifyRoute: AuthVerifyRoute,
+  AuthWelcomeRoute: AuthWelcomeRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  AuthRoute: AuthRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
