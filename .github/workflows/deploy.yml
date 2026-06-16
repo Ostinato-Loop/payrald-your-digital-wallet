@@ -44,7 +44,7 @@ jobs:
 
       - name: Set SUPABASE_ANON_KEY secret on Pages
         continue-on-error: true
-        run: echo "$SUPABASE_ANON_KEY" | wrangler pages secret put SUPABASE_ANON_KEY --project-name payrald
+        run: echo "$SUPABASE_ANON_KEY" | bunx wrangler pages secret put SUPABASE_ANON_KEY --project-name payrald
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
