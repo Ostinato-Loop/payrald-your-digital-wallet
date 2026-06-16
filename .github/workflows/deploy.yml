@@ -45,6 +45,16 @@ jobs:
       - name: Verify build output
         run: ls -la .output/public/
 
+      - name: Prepare SSR worker for Pages deployment
+        run: |
+          # Cloudflare Pages advanced mode: _worker.js in the deploy dir handles all requests.
+          # Nitro outputs the server entry to .output/server/index.mjs with no_bundle:true,
+          # so all module chunks must be co-located with the worker in the deploy directory.
+          cp -r .output/server/. .output/public/
+          mv .output/public/index.mjs .output/public/_worker.js
+          echo "=== Deploy dir after worker prep ==="
+          ls -la .output/public/
+
       - name: Create Pages project if not exists
         continue-on-error: true
         run: bunx wrangler pages project create payrald --production-branch main
